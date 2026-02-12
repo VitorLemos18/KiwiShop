@@ -3,10 +3,12 @@
 {% load static %}
 {% block title %}Checkout | Kiwi Imports{% endblock %}
 <style>
-/* CARD WRAPPER */
+/* ===========================
+   CARD WRAPPER
+=========================== */
 #card-wrapper {
-  position: relative !important; /* Mantido relativo para posicionamento natural */
-  z-index: 10; /* Garante que fique acima de outros elementos */
+  position: relative !important;
+  z-index: 10; /* Garante prioridade visual */
   box-shadow: 0 4px 20px rgba(0,0,0,0.15);
   border-radius: 12px;
   width: 100% !important;
@@ -14,14 +16,15 @@
   margin-left: 1rem;
 }
 
-/* CAMPOS DE CARTÃO */
+/* ===========================
+   CAMPOS DE CARTÃO
+=========================== */
 #card-fields {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
 }
 
-/* Inputs e selects ocupam 100% da largura do container */
 #card-fields input, #card-fields select {
   width: 100%;
 }
@@ -34,44 +37,65 @@
     margin-left: 0;
     margin-top: 1rem;
     max-width: 100% !important;
+    order: 2; /* Faz o cartão ir abaixo do select de parcelamento */
   }
 }
 
-/* TOGGLE MÉTODOS DE PAGAMENTO */
+/* ===========================
+   PAYMENT METHODS CARDS
+=========================== */
 .payment-method {
-  transition: all 0.3s ease;
-  border-radius: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 120px; /* Altura uniforme */
+  padding: 1.2rem 0.5rem;
   font-weight: 600;
   text-align: center;
-  padding: 1.5rem 1rem;
-  user-select: none;
+  border-radius: 0.75rem;
   border-width: 2px;
+  transition: all 0.3s ease;
   cursor: pointer;
+  flex: 1 1 0; /* Flexível em row */
 }
+
+.payment-method i,
+.payment-method img {
+  display: block;
+  margin-bottom: 6px;
+  max-height: 40px;
+}
+
 .payment-method.active {
   border-color: #0d6efd;
-  color: #0d6efd;
   background-color: #e7f1ff;
+  color: #0d6efd;
   box-shadow: 0 0 12px rgba(13, 110, 253, 0.35);
   transform: translateY(-2px);
 }
-.payment-method img {
-  display: block;
-  margin: 0 auto 6px auto;
-}
 
-/* HOVER efeito leve */
 .payment-method:not(.active):hover {
   border-color: #0d6efd;
   box-shadow: 0 0 6px rgba(13, 110, 253, 0.2);
 }
 
-/* RESPONSIVO */
 @media (max-width: 575px) {
   .payment-method {
     font-size: 0.9rem;
+    min-height: 100px;
     padding: 1rem 0.5rem;
   }
+}
+
+/* ===========================
+   RESPONSIVE FLEX WRAP
+=========================== */
+#payment-method-cards {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 </style>
 
@@ -89,11 +113,9 @@
                 <i class="fas fa-user text-primary me-2"></i>
                 Dados de Entrega
               </h3>
-              <!-- FORM PRINCIPAL -->
               <form id="checkout-form" method="post" action="">
                 {% csrf_token %}
                 <div class="row g-3">
-                  <!-- Campos pessoais e endereço -->
                   <div class="col-12 col-md-6">
                     <label class="form-label fw-semibold">Nome *</label>
                     {{ form.first_name|add_class:"form-control"|attr:"id:first-name-field" }}
@@ -132,28 +154,27 @@
                 <h4 class="fw-bold mb-3">Dados de pagamento</h4>
                 <p class="text-secondary mb-4">Selecione uma forma de pagamento</p>
 
-                <!-- Toggle métodos pagamento -->
-                <div id="payment-method-cards" class="d-flex gap-3 mb-4 flex-wrap">
-                  <button type="button" class="btn payment-method active flex-fill" data-method="card" aria-pressed="true">
-                    <i class="fas fa-credit-card fa-2x mb-2"></i><br>
+                <!-- MÉTODOS DE PAGAMENTO PADRONIZADOS -->
+                <div id="payment-method-cards">
+                  <button type="button" class="btn payment-method active" data-method="card" aria-pressed="true">
+                    <i class="fas fa-credit-card fa-2x"></i>
                     CARTÃO DE CRÉDITO
                   </button>
-                  <button type="button" class="btn payment-method flex-fill" data-method="pix" aria-pressed="false">
-                    <img src="{% static 'images/pix-icon.svg' %}" alt="PIX" style="width:40px; height:40px; margin-bottom:6px;"><br>
+                  <button type="button" class="btn payment-method" data-method="pix" aria-pressed="false">
+                    <img src="{% static 'images/pix-icon.svg' %}" alt="PIX">
                     PIX
                   </button>
-                  <button type="button" class="btn payment-method flex-fill" data-method="boleto" aria-pressed="false">
-                    <i class="fas fa-barcode fa-2x mb-2"></i><br>
+                  <button type="button" class="btn payment-method" data-method="boleto" aria-pressed="false">
+                    <i class="fas fa-barcode fa-2x"></i>
                     Boleto
                   </button>
                 </div>
 
-                <!-- Campos de pagamento -->
+                <!-- CAMPOS DE PAGAMENTO -->
                 <div id="payment-fields">
-
                   <!-- Cartão -->
                   <div id="card-fields" class="d-none row align-items-center">
-                    <div class="col-12 col-md-6">
+                    <div class="col-12 col-md-6 order-1">
                       <div>
                         <div class="mb-3">
                           <label class="form-label fw-semibold" for="card-number">Número do Cartão *</label>
@@ -173,7 +194,7 @@
                           <label class="form-label fw-semibold" for="card-cvc">Cód. de segurança *</label>
                           <input type="text" id="card-cvc" name="card_cvc" class="form-control" placeholder="CVC" maxlength="4" autocomplete="off" required>
                         </div>
-                        <div class="mb-3">
+                        <div class="mb-3 order-2">
                           <label for="card-installments" class="form-label fw-semibold">Parcelamento</label>
                           <select id="card-installments" name="installments" class="form-select" required>
                             <option value="" disabled selected>Selecione o parcelamento</option>
@@ -181,7 +202,7 @@
                         </div>
                       </div>
                     </div>
-                    <div class="col-12 col-md-6 d-flex justify-content-center">
+                    <div class="col-12 col-md-6 d-flex justify-content-center order-3">
                       <div id="card-wrapper"></div>
                     </div>
                   </div>
@@ -216,7 +237,7 @@
   </div>
 </div>
 
-<!-- Styles adicionais -->
+<!-- STYLES E SCRIPTS ADICIONAIS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
 <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
