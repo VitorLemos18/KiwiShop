@@ -7,8 +7,8 @@
    CARD WRAPPER
 =========================== */
 #card-wrapper {
-  position: relative !important;
-  z-index: 10; /* Garante prioridade visual */
+  position: relative;
+  z-index: 1; /* remove a sobreposição */
   box-shadow: 0 4px 20px rgba(0,0,0,0.15);
   border-radius: 12px;
   width: 100% !important;
@@ -28,75 +28,86 @@
 #card-fields input, #card-fields select {
   width: 100%;
 }
-
 @media (max-width: 767px) {
-  #card-fields {
-    flex-direction: column;
-  }
   #card-wrapper {
     margin-left: 0;
     margin-top: 1rem;
     max-width: 100% !important;
-    order: 2; /* Faz o cartão ir abaixo do select de parcelamento */
+    order: 2;
+    z-index: 0; /* garante que não fique por cima de nada */
   }
 }
 
 /* ===========================
    PAYMENT METHODS CARDS
 =========================== */
-.payment-method {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  min-height: 120px; /* Altura uniforme */
-  padding: 1.2rem 0.5rem;
-  font-weight: 600;
-  text-align: center;
-  border-radius: 0.75rem;
-  border-width: 2px;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  flex: 1 1 0; /* Flexível em row */
-}
-
-.payment-method i,
-.payment-method img {
-  display: block;
-  margin-bottom: 6px;
-  max-height: 40px;
-}
-
-.payment-method.active {
-  border-color: #0d6efd;
-  background-color: #e7f1ff;
-  color: #0d6efd;
-  box-shadow: 0 0 12px rgba(13, 110, 253, 0.35);
-  transform: translateY(-2px);
-}
-
-.payment-method:not(.active):hover {
-  border-color: #0d6efd;
-  box-shadow: 0 0 6px rgba(13, 110, 253, 0.2);
-}
-
-@media (max-width: 575px) {
-  .payment-method {
-    font-size: 0.9rem;
-    min-height: 100px;
-    padding: 1rem 0.5rem;
-  }
-}
-
 /* ===========================
-   RESPONSIVE FLEX WRAP
+   PAYMENT METHODS CARDS
 =========================== */
 #payment-method-cards {
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
 }
+
+.payment-method {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 120px;
+  padding: 1.5rem 0.5rem;
+
+  background: #f5f6f8;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #6c757d;
+  text-align: center;
+
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+/* Ícones */
+.payment-method i,
+.payment-method img {
+  font-size: 42px;
+  max-height: 42px;
+  color: inherit;
+}
+
+/* Card ativo (igual ao da imagem) */
+.payment-method.active {
+  background: #eef4ff;
+  border-color: #6ea8fe;
+  color: #4c7dff;
+}
+
+/* Hover leve */
+.payment-method:hover {
+  border-color: #6ea8fe;
+}
+
+/* Mobile */
+@media (max-width: 575px) {
+  .payment-method {
+    min-height: 100px;
+    padding: 1.2rem 0.5rem;a
+    font-size: 0.85rem;
+  }
+
+  .payment-method i,
+  .payment-method img {
+    font-size: 34px;
+    max-height: 34px;
+  }
+}
+
 </style>
 
 {% block content %}
