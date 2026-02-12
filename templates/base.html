@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Kiwi Imports{% endblock %}</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- jQuery para AJAX -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <style>
+    :root {
+        --primary: #0ea5a4;
+        --primary-dark: #0f766e;
+        --gray-50: #f8fafc;
+        --gray-200: #e2e8f0;
+        --gray-700: #334155;
+        --gray-900: #0f172a;
+        --radius: 18px;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background: var(--gray-50);
+        color: var(--gray-900);
+        -webkit-font-smoothing: antialiased;
+    }
+
+    /* NAVBAR PREMIUM */
+    .navbar-custom {
+        background: rgba(255,255,255,0.85);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--gray-200);
+        transition: all 0.3s ease;
+    }
+
+    .navbar-scrolled {
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+
+    .navbar-brand {
+        font-weight: 700;
+        font-size: 1.35rem;
+        letter-spacing: -0.4px;
+    }
+
+    .nav-link {
+        font-weight: 500;
+        color: var(--gray-700) !important;
+        transition: 0.2s ease;
+    }
+
+    .nav-link:hover {
+        color: var(--primary) !important;
+    }
+
+    /* BOTÕES */
+    .btn-primary {
+        background: var(--primary);
+        border: none;
+        border-radius: 50px;
+        padding: 8px 18px;
+        font-weight: 500;
+    }
+
+    .btn-primary:hover {
+        background: var(--primary-dark);
+    }
+
+    .btn-outline-secondary {
+        border-radius: 50px;
+    }
+
+    /* NAVBAR CART COUNTER */
+    .cart-counter {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        font-size: 0.7rem;
+        min-width: 18px;
+        height: 18px;
+        background: #dc3545;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+    }
+
+    /* FOOTER */
+    footer {
+        background: var(--gray-900);
+    }
+
+    footer h6 {
+        font-weight: 600;
+    }
+
+    footer a {
+        color: rgba(255,255,255,0.65);
+        text-decoration: none;
+        transition: 0.2s ease;
+    }
+
+    footer a:hover {
+        color: #fff;
+    }
+
+    footer hr {
+        opacity: 0.1;
+    }
+    </style>
+
+</head>
+
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-light navbar-custom fixed-top py-3">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{% url 'products:product_list' %}">
+                🥝 <span class="text-success">Kiwi</span>Imports
+            </a>
+
+            <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navMenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navMenu">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item me-3">
+                        <a class="nav-link fw-semibold" href="#catalogo">
+                            Catálogo
+                        </a>
+                    </li>
+
+                    <li class="nav-item me-3">
+                        <a class="btn btn-outline-secondary btn-sm px-3" href="/admin/">
+                            <i class="fas fa-cog me-1"></i> Admin
+                        </a>
+                    </li>
+
+                    <li class="nav-item position-relative">
+                        <a class="btn btn-primary btn-sm px-4 position-relative" href="{% url 'cart:cart' %}">
+                            <i class="fas fa-shopping-cart me-2"></i> Carrinho
+                            <span class="cart-counter" id="cartCount">0</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div style="height: 85px;"></div>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="text-white mt-5 pt-5 pb-4">
+        <div class="container">
+            <div class="row gy-4">
+                <div class="col-md-4">
+                    <h5 class="fw-bold">🥝 Kiwi Imports</h5>
+                    <p class="small text-white-50">
+                        Produtos importados selecionados com curadoria premium.
+                    </p>
+                </div>
+
+                <div class="col-md-4">
+                    <h6 class="fw-semibold mb-3">Categorias</h6>
+                    {% if categories %}
+                        {% for category in categories %}
+                        <div class="small mb-2">
+                            <a href="{% url 'products:product_list' %}?category={{ category.slug }}">
+                                {{ category.name }} ({{ category.active_products_count }})
+                            </a>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="col-md-4">
+                    <h6 class="fw-semibold mb-3">Contato</h6>
+                    <div class="small text-white-50">
+                        Aracaju - SE<br>
+                        (79) 99999-9999<br>
+                        contato@kiwiimports.com
+                    </div>
+                </div>
+            </div>
+
+            <hr class="border-secondary mt-4">
+            <div class="text-center small text-white-50">
+                © 2026 Kiwi Imports. Todos os direitos reservados.
+            </div>
+        </div>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- CARRINHO AJAX -->
+    <script>
+    $(document).ready(function() {
+        // Atualizar contador carrinho na página
+        function updateCartCount() {
+            $.ajax({
+                url: '{% url "cart:cart" %}',
+                method: 'GET',
+                success: function(data) {
+                    const count = $(data).find('.cart-item').length || 0;
+                    $('#cartCount').text(count).toggle(count > 0);
+                }
+            });
+        }
+
+        // Adicionar ao carrinho (product detail)
+        $(document).on('click', '.add-to-cart-btn', function() {
+            const btn = $(this);
+            const productId = btn.data('product-id');
+            const productName = btn.data('product-name');
+            const quantity = btn.closest('.row').find('input[type="number"]').val() || 1;
+            
+            btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i> Adicionando...');
+
+            $.ajax({
+                url: '{% url "cart:add" %}',
+                method: 'POST',
+                data: {
+                    'product_id': productId,
+                    'quantity': quantity,
+                    'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+                },
+                success: function(response) {
+                    // Toast de sucesso
+                    const toast = `
+                        <div class="toast-container position-fixed bottom-0 end-0 p-3">
+                            <div id="successToast" class="toast align-items-center text-white bg-success border-0" role="alert">
+                                <div class="d-flex">
+                                    <div class="toast-body">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        ${quantity} x ${productName} adicionado ao carrinho!
+                                    </div>
+                                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                                </div>
+                            </div>
+                        </div>`;
+                    
+                    $('body').append(toast);
+                    $('.toast').toast('show');
+                    
+                    // Atualizar contador
+                    $('#cartCount').text(response.count).show();
+                    btn.prop('disabled', false).html('<i class="fas fa-shopping-cart me-2"></i> Adicionar ao Carrinho');
+                },
+                error: function() {
+                    alert('Erro ao adicionar ao carrinho');
+                    btn.prop('disabled', false).html('<i class="fas fa-shopping-cart me-2"></i> Adicionar ao Carrinho');
+                }
+            });
+        });
+
+        // Controles quantidade carrinho
+        $(document).on('click', '.qty-btn', function() {
+            const productId = $(this).data('product');
+            const action = $(this).data('action');
+            const currentQty = parseInt($(this).siblings('.qty-input').val());
+            let newQty = currentQty;
+            
+            if (action === 'plus') newQty++;
+            else if (action === 'minus' && currentQty > 1) newQty--;
+            
+            updateCartItem(productId, newQty);
+        });
+
+        $(document).on('click', '.remove-btn', function() {
+            const productId = $(this).data('product');
+            if (confirm('Remover item do carrinho?')) {
+                updateCartItem(productId, 0);
+            }
+        });
+
+        function updateCartItem(productId, quantity) {
+            $.ajax({
+                url: '{% url "cart:update" %}',
+                method: 'POST',
+                data: {
+                    'product_id': productId,
+                    'quantity': quantity,
+                    'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+                },
+                success: function() {
+                    location.reload();
+                }
+            });
+        }
+    });
+
+    // Navbar scroll effect
+    window.addEventListener("scroll", function () {
+        const navbar = document.querySelector(".navbar-custom");
+        navbar.classList.toggle("navbar-scrolled", window.scrollY > 30);
+    });
+    </script>
+
+    {% csrf_token %}
+</body>
+</html>

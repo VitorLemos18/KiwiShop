@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+{% block title %}{{ product.name }} | Kiwi Imports{% endblock %}
+
+{% block content %}
+
+<style>
+/* ===== PREMIUM PRODUCT DETAIL ===== */
+
+.product-layout {
+    background: #fff;
+    border-radius: 28px;
+    padding: 60px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.06);
+}
+
+.product-image-wrapper {
+    background: #f1f5f9;
+    border-radius: 24px;
+    padding: 40px;
+}
+
+.product-image-wrapper img {
+    width: 100%;
+    max-height: 600px;
+    object-fit: contain;
+    transition: transform .4s ease;
+}
+
+.product-image-wrapper:hover img {
+    transform: scale(1.05);
+}
+
+.product-info-sticky {
+    position: sticky;
+    top: 120px;
+}
+
+.price-highlight {
+    font-size: 2.8rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+
+.buy-box {
+    background: #f8fafc;
+    border-radius: 20px;
+    padding: 30px;
+}
+
+.related-section {
+    margin-top: 120px;
+}
+
+.related-card {
+    border-radius: 20px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.05);
+    transition: .3s ease;
+}
+
+.related-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 25px 60px rgba(0,0,0,0.08);
+}
+
+.related-card img {
+    height: 230px;
+    object-fit: cover;
+}
+</style>
+
+
+<div class="container my-5">
+
+    <div class="product-layout">
+        <div class="row g-5">
+
+            <!-- IMAGE SIDE -->
+            <div class="col-lg-7">
+                <div class="product-image-wrapper text-center">
+                    {% if product.image %}
+                        <img src="{{ product.image }}" alt="{{ product.name }}">
+                    {% else %}
+                        <div style="height:500px" class="d-flex align-items-center justify-content-center">
+                            <i class="fas fa-box fa-5x text-muted"></i>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- INFO SIDE -->
+            <div class="col-lg-5">
+                <div class="product-info-sticky">
+
+                    <div class="text-muted small mb-2">
+                        {{ product.category.name }}
+                    </div>
+
+                    <h1 class="fw-bold mb-3">
+                        {{ product.name }}
+                    </h1>
+
+                    <div class="price-highlight mb-4">
+                        R$ {{ product.price|floatformat:2 }}
+                    </div>
+
+                    {% if product.short_description %}
+                        <p class="text-muted mb-4">
+                            {{ product.short_description }}
+                        </p>
+                    {% endif %}
+
+                    <!-- BUY BOX -->
+                    <div class="buy-box mb-4">
+
+                        {% if product.stock > 0 %}
+                            <div class="mb-3 text-success fw-semibold">
+                                {{ product.stock }} disponíveis em estoque
+                            </div>
+
+                            <div class="row g-3 align-items-center">
+                                <div class="col-4">
+                                    <input type="number"
+                                           class="form-control"
+                                           value="1"
+                                           min="1"
+                                           max="{{ product.stock }}">
+                                </div>
+
+                                <div class="col-8">
+                                    <button class="btn btn-primary w-100 py-3 fw-semibold add-to-cart-btn" 
+                                            data-product-id="{{ product.id }}"
+                                            data-product-name="{{ product.name }}"
+                                            data-product-price="{{ product.price }}">
+                                        <i class="fas fa-shopping-cart me-2"></i>
+                                        Adicionar ao Carrinho
+                                    </button>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="text-danger fw-bold text-center py-3">
+                                Produto esgotado
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+                    <div class="small text-muted">
+                        SKU: {{ product.id }}
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        {% if product.description %}
+        <div class="mt-5 pt-5 border-top">
+            <h4 class="fw-bold mb-4">Descrição</h4>
+            <div class="text-muted" style="max-width: 900px;">
+                {{ product.description|linebreaks }}
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+
+
+    <!-- RELATED PRODUCTS -->
+    {% if related_products %}
+    <div class="related-section">
+
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <h3 class="fw-bold mb-0">Você também pode gostar</h3>
+            <a href="{% url 'products:product_list' %}" class="text-decoration-none small">
+                Ver catálogo →
+            </a>
+        </div>
+
+        <div class="row g-4">
+            {% for item in related_products %}
+            <div class="col-xl-3 col-md-6">
+                <a href="{{ item.get_absolute_url }}" class="text-decoration-none text-dark">
+                    <div class="related-card h-100">
+
+                        {% if item.image %}
+                        <img src="{{ item.image }}" class="w-100">
+                        {% endif %}
+
+                        <div class="p-4">
+                            <h6 class="fw-semibold mb-2">
+                                {{ item.name }}
+                            </h6>
+                            <div class="fw-bold">
+                                R$ {{ item.price|floatformat:2 }}
+                            </div>
+                        </div>
+
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}

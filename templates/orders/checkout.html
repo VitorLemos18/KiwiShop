@@ -1,0 +1,309 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Checkout | Kiwi Imports{% endblock %}
+<style>
+/* CARD WRAPPER */
+#card-wrapper {
+  position: relative !important; /* Mantido relativo para posicionamento natural */
+  z-index: 10; /* Garante que fique acima de outros elementos */
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  border-radius: 12px;
+  width: 100% !important;
+  max-width: 320px;
+  margin-left: 1rem;
+}
+
+/* CAMPOS DE CARTÃO */
+#card-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+/* Inputs e selects ocupam 100% da largura do container */
+#card-fields input, #card-fields select {
+  width: 100%;
+}
+
+@media (max-width: 767px) {
+  #card-fields {
+    flex-direction: column;
+  }
+  #card-wrapper {
+    margin-left: 0;
+    margin-top: 1rem;
+    max-width: 100% !important;
+  }
+}
+
+/* TOGGLE MÉTODOS DE PAGAMENTO */
+.payment-method {
+  transition: all 0.3s ease;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+  padding: 1.5rem 1rem;
+  user-select: none;
+  border-width: 2px;
+  cursor: pointer;
+}
+.payment-method.active {
+  border-color: #0d6efd;
+  color: #0d6efd;
+  background-color: #e7f1ff;
+  box-shadow: 0 0 12px rgba(13, 110, 253, 0.35);
+  transform: translateY(-2px);
+}
+.payment-method img {
+  display: block;
+  margin: 0 auto 6px auto;
+}
+
+/* HOVER efeito leve */
+.payment-method:not(.active):hover {
+  border-color: #0d6efd;
+  box-shadow: 0 0 6px rgba(13, 110, 253, 0.2);
+}
+
+/* RESPONSIVO */
+@media (max-width: 575px) {
+  .payment-method {
+    font-size: 0.9rem;
+    padding: 1rem 0.5rem;
+  }
+}
+</style>
+
+{% block content %}
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <div class="row g-4">
+
+        <!-- FORM DADOS -->
+        <div class="col-lg-7">
+          <div class="card border-0 shadow-lg rounded-4">
+            <div class="card-body p-4 p-lg-5">
+              <h3 class="fw-bold mb-4">
+                <i class="fas fa-user text-primary me-2"></i>
+                Dados de Entrega
+              </h3>
+              <!-- FORM PRINCIPAL -->
+              <form id="checkout-form" method="post" action="">
+                {% csrf_token %}
+                <div class="row g-3">
+                  <!-- Campos pessoais e endereço -->
+                  <div class="col-12 col-md-6">
+                    <label class="form-label fw-semibold">Nome *</label>
+                    {{ form.first_name|add_class:"form-control"|attr:"id:first-name-field" }}
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <label class="form-label fw-semibold">Sobrenome *</label>
+                    {{ form.last_name|add_class:"form-control"|attr:"id:last-name-field" }}
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <label class="form-label fw-semibold">Email *</label>
+                    {{ form.email|add_class:"form-control"|attr:"id:email-field" }}
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <label class="form-label fw-semibold">Telefone *</label>
+                    {{ form.phone|add_class:"form-control"|attr:"id:phone-field" }}
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <label class="form-label fw-semibold">CEP *</label>
+                    {{ form.zip_code|add_class:"form-control"|attr:"id:zip-code-field" }}
+                  </div>
+                  <div class="col-12 col-md-8">
+                    <label class="form-label fw-semibold">Endereço *</label>
+                    {{ form.address|add_class:"form-control"|attr:"id:address-field" }}
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <label class="form-label fw-semibold">Cidade *</label>
+                    {{ form.city|add_class:"form-control"|attr:"id:city-field" }}
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <label class="form-label fw-semibold">Estado *</label>
+                    {{ form.state|add_class:"form-select"|attr:"id:state-field" }}
+                  </div>
+                </div>
+
+                <hr class="my-4">
+                <h4 class="fw-bold mb-3">Dados de pagamento</h4>
+                <p class="text-secondary mb-4">Selecione uma forma de pagamento</p>
+
+                <!-- Toggle métodos pagamento -->
+                <div id="payment-method-cards" class="d-flex gap-3 mb-4 flex-wrap">
+                  <button type="button" class="btn payment-method active flex-fill" data-method="card" aria-pressed="true">
+                    <i class="fas fa-credit-card fa-2x mb-2"></i><br>
+                    CARTÃO DE CRÉDITO
+                  </button>
+                  <button type="button" class="btn payment-method flex-fill" data-method="pix" aria-pressed="false">
+                    <img src="{% static 'images/pix-icon.svg' %}" alt="PIX" style="width:40px; height:40px; margin-bottom:6px;"><br>
+                    PIX
+                  </button>
+                  <button type="button" class="btn payment-method flex-fill" data-method="boleto" aria-pressed="false">
+                    <i class="fas fa-barcode fa-2x mb-2"></i><br>
+                    Boleto
+                  </button>
+                </div>
+
+                <!-- Campos de pagamento -->
+                <div id="payment-fields">
+
+                  <!-- Cartão -->
+                  <div id="card-fields" class="d-none row align-items-center">
+                    <div class="col-12 col-md-6">
+                      <div>
+                        <div class="mb-3">
+                          <label class="form-label fw-semibold" for="card-number">Número do Cartão *</label>
+                          <input type="tel" id="card-number" name="card_number" class="form-control" placeholder="0000 0000 0000 0000" maxlength="19" autocomplete="off" required>
+                        </div>
+                        <div class="row g-3 mb-3">
+                          <div class="col-6">
+                            <label class="form-label fw-semibold" for="card-expiry-month">Mês *</label>
+                            <input type="text" id="card-expiry-month" name="card_expiry_month" class="form-control" placeholder="MM" maxlength="2" autocomplete="off" required>
+                          </div>
+                          <div class="col-6">
+                            <label class="form-label fw-semibold" for="card-expiry-year">Ano *</label>
+                            <input type="text" id="card-expiry-year" name="card_expiry_year" class="form-control" placeholder="AA" maxlength="2" autocomplete="off" required>
+                          </div>
+                        </div>
+                        <div class="mb-3">
+                          <label class="form-label fw-semibold" for="card-cvc">Cód. de segurança *</label>
+                          <input type="text" id="card-cvc" name="card_cvc" class="form-control" placeholder="CVC" maxlength="4" autocomplete="off" required>
+                        </div>
+                        <div class="mb-3">
+                          <label for="card-installments" class="form-label fw-semibold">Parcelamento</label>
+                          <select id="card-installments" name="installments" class="form-select" required>
+                            <option value="" disabled selected>Selecione o parcelamento</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-12 col-md-6 d-flex justify-content-center">
+                      <div id="card-wrapper"></div>
+                    </div>
+                  </div>
+
+                  <!-- PIX -->
+                  <div id="pix-fields" class="d-none text-center">
+                    <p>Para pagamento via PIX, use o QR Code abaixo:</p>
+                    <img src="{% static 'images/qr-pix.png' %}" alt="QR Code PIX" style="max-width: 200px; width: 100%;">
+                  </div>
+
+                  <!-- Boleto -->
+                  <div id="boleto-fields" class="d-none">
+                    <p>Após finalizar, você receberá o boleto para pagamento por email.</p>
+                  </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-3 fw-bold fs-5 mt-4">
+                  <i class="fas fa-credit-card me-2"></i> Finalizar Pedido
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- RESUMO DO PEDIDO -->
+        <div class="col-lg-5">
+          {% include 'orders/partials/order-summary.html' %}
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Styles adicionais -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/card/2.5.0/card.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/card/2.5.0/card.min.js"></script>
+
+<script>
+$(document).ready(function() {
+  // Toggle métodos pagamento
+  $('.payment-method').click(function() {
+    $('.payment-method').removeClass('active').attr('aria-pressed', 'false');
+    $(this).addClass('active').attr('aria-pressed', 'true');
+
+    const method = $(this).data('method');
+    $('#payment-fields > div').addClass('d-none');
+    if (method === 'card') $('#card-fields').removeClass('d-none');
+    else if (method === 'pix') $('#pix-fields').removeClass('d-none');
+    else if (method === 'boleto') $('#boleto-fields').removeClass('d-none');
+  });
+
+  // Inicializa com cartão selecionado
+  $('.payment-method[data-method="card"]').click();
+
+  // Choices.js para parcelamento
+  const installmentsSelect = document.getElementById('card-installments');
+  const choices = new Choices(installmentsSelect, {
+    searchEnabled: false,
+    itemSelectText: '',
+    placeholder: true,
+    placeholderValue: 'Selecione o parcelamento',
+    shouldSort: false,
+    position: 'bottom'
+  });
+
+  function updateInstallments(installments) {
+    choices.clearStore();
+    const options = installments.map(inst => ({
+      value: inst.qty,
+      label: `${inst.qty}x de R$ ${inst.value.toFixed(2)}`
+    }));
+    choices.setChoices(options, 'value', 'label', true);
+  }
+
+  updateInstallments([
+    { qty: 1, value: 95.69 },
+    { qty: 2, value: 47.85 },
+    { qty: 3, value: 32.00 },
+    { qty: 6, value: 16.00 },
+    { qty: 12, value: 8.00 }
+  ]);
+
+  // Inicializa Card.js com o formulário geral
+  var card = new Card({
+    form: '#checkout-form',
+    container: '#card-wrapper',
+    formSelectors: {
+      numberInput: 'input#card-number',
+      expiryMonthInput: 'input#card-expiry-month',
+      expiryYearInput: 'input#card-expiry-year',
+      cvcInput: 'input#card-cvc',
+      nameInput: 'input#first-name-field'
+    },
+    width: 320,
+    formatting: true,
+    messages: {
+      validDate: 'válido até',
+      monthYear: 'MM/AA',
+      name: 'nome completo',
+      number: 'Número do cartão',
+      expiry: 'Validade',
+      cvc: 'CVC'
+    }
+  });
+
+  // Auto completar endereço via CEP
+  $('#zip-code-field').on('blur', function() {
+    let cep = $(this).val().replace(/\D/g, '');
+    if (cep.length !== 8) return;
+
+    $.getJSON(`https://brasilapi.com.br/api/cep/v1/${cep}`, function(data) {
+      $('#address-field').val(data.street || '');
+      $('#city-field').val(data.city || '');
+      $('#state-field').val(data.state || '');
+    }).fail(function() {
+      alert('CEP não encontrado.');
+    });
+  });
+});
+</script>
+{% endblock %}

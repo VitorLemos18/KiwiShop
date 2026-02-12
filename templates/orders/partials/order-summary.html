@@ -1,0 +1,33 @@
+<div class="card border-0 shadow-lg rounded-4">
+    <div class="card-body p-4">
+        <h3 class="fw-bold mb-4">
+            <i class="fas fa-shopping-cart text-primary me-2"></i>
+            Resumo do Pedido
+        </h3>
+
+        {% if cart_items %}
+            <ul class="list-group mb-3">
+                {% for item in cart_items %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="my-0">{{ item.product.name }}</h6>
+                            <small class="text-muted">Quantidade: {{ item.quantity }}</small>
+                        </div>
+                        <span class="text-muted">R$ {{ item.total_price|floatformat:2 }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+
+            <div class="d-flex justify-content-between fw-bold fs-5 mb-3">
+                <span>Total:</span>
+                <span>R$ {{ total|floatformat:2 }}</span>
+            </div>
+
+            <small class="text-muted">
+                Os impostos e taxas de entrega serão calculados no próximo passo.
+            </small>
+        {% else %}
+            <p class="text-center text-muted">Seu carrinho está vazio.</p>
+        {% endif %}
+    </div>
+</div>

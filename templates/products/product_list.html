@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+{% block title %}Catálogo | Kiwi Imports{% endblock %}
+
+{% block content %}
+
+<style>
+/* HERO */
+.hero-premium {
+    background: linear-gradient(135deg, #0ea5a4, #0f766e);
+    color: white;
+    border-radius: 24px;
+}
+
+/* SIDEBAR */
+.filter-card {
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+/* PRODUCT CARD */
+.product-card {
+    border: none;
+    border-radius: 20px;
+    overflow: hidden;
+    transition: all .3s ease;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.04);
+    background: #fff;
+}
+
+.product-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.08);
+}
+
+.product-img-wrapper {
+    height: 260px;
+    overflow: hidden;
+}
+
+.product-img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform .4s ease;
+}
+
+.product-card:hover img {
+    transform: scale(1.05);
+}
+
+.category-badge {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background: rgba(0,0,0,0.65);
+    color: #fff;
+    padding: 5px 12px;
+    font-size: 0.75rem;
+    border-radius: 50px;
+}
+
+.price {
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.stock-badge {
+    font-size: 0.75rem;
+}
+
+.section-title {
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+</style>
+
+
+<!-- HERO MAIS IMPACTANTE -->
+<section class="container my-5">
+    <div class="hero-premium p-5 text-center">
+        <h1 class="fw-bold display-6 mb-3">
+            Produtos Importados Selecionados
+        </h1>
+        <p class="opacity-75 mb-4">
+            Qualidade internacional com curadoria premium.
+        </p>
+        <a href="#catalogo" class="btn btn-light btn-lg px-4 fw-semibold">
+            Explorar Catálogo
+        </a>
+    </div>
+</section>
+
+
+<div class="container mb-5" id="catalogo">
+    <div class="row g-5">
+
+        <!-- SIDEBAR MELHORADA -->
+        <div class="col-lg-3">
+            <div class="filter-card p-4 bg-white">
+                <h6 class="fw-bold mb-4">Categorias</h6>
+
+                <a href="{% url 'products:product_list' %}"
+                   class="d-block mb-3 text-decoration-none fw-semibold {% if not request.GET.category %}text-dark{% else %}text-muted{% endif %}">
+                    Todos
+                </a>
+
+                {% for category in categories %}
+                <a href="?category={{ category.slug }}"
+                   class="d-flex justify-content-between align-items-center mb-3 text-decoration-none {% if request.GET.category == category.slug %}fw-bold text-dark{% else %}text-muted{% endif %}">
+                    <span>{{ category.name }}</span>
+                    <small class="badge bg-light text-dark">
+                        {{ category.active_products_count }}
+                    </small>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- PRODUTOS -->
+        <div class="col-lg-9">
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="section-title mb-1">
+                        {% if request.GET.category %}
+                            {{ request.GET.category|title }}
+                        {% else %}
+                            Catálogo Completo
+                        {% endif %}
+                    </h4>
+                    <small class="text-muted">
+                        {{ products.paginator.count }} produtos disponíveis
+                    </small>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                {% for product in products %}
+                <div class="col-xl-4 col-md-6">
+                    <div class="product-card h-100 position-relative">
+
+                        {% if product.image %}
+                        <div class="product-img-wrapper position-relative">
+                            <img src="{{ product.image }}" alt="{{ product.name }}">
+                            <div class="category-badge">
+                                {{ product.category.name }}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div class="p-4 d-flex flex-column">
+
+                            <h6 class="fw-semibold mb-2">
+                                {{ product.name }}
+                            </h6>
+
+                            <div class="price mb-3">
+                                R$ {{ product.price|floatformat:2 }}
+                            </div>
+
+                            <div class="mt-auto">
+                                {% if product.stock > 0 %}
+                                <div class="mb-3">
+                                    <span class="badge bg-success stock-badge">
+                                        {{ product.stock }} em estoque
+                                    </span>
+                                </div>
+
+                                <a href="{{ product.get_absolute_url }}"
+                                   class="btn btn-primary w-100">
+                                    Ver Detalhes
+                                </a>
+                                {% else %}
+                                <button class="btn btn-outline-secondary w-100" disabled>
+                                    Indisponível
+                                </button>
+                                {% endif %}
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12 text-center py-5">
+                    <h5 class="text-muted">Nenhum produto encontrado</h5>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- PAGINAÇÃO MELHORADA -->
+            {% if is_paginated %}
+            <nav class="mt-5">
+                <ul class="pagination justify-content-center">
+
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link rounded-pill"
+                           href="?page={{ page_obj.previous_page_number }}">
+                            Anterior
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                    <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                        <a class="page-link rounded-pill"
+                           href="?page={{ num }}">
+                            {{ num }}
+                        </a>
+                    </li>
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link rounded-pill"
+                           href="?page={{ page_obj.next_page_number }}">
+                            Próxima
+                        </a>
+                    </li>
+                    {% endif %}
+
+                </ul>
+            </nav>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
